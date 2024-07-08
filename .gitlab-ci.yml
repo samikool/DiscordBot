@@ -1,0 +1,76 @@
+stages:
+  - build
+  - test
+  - store
+  - cleanup
+  - release
+
+variables:
+  DOCKERHUB_USER: samikool
+  DOCKER_IMG_NAME: discordbot
+  DOCKER_IMG_TAG:  ${CI_COMMIT_REF_NAME}
+  DOCKER_IMG_FULL_NAME: ${DOCKER_IMG_NAME}:${CI_COMMIT_REF_NAME}
+  DOCKER_IMG_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}
+  DOCKER_IMG_FULL_PATH: ${DOCKER_IMG_PATH}/${DOCKER_IMG_FULL_NAME}
+
+build:
+  stage: build
+  script:
+    - echo "Building the project..."
+    - |
+      docker build . -f ci/Dockerfile -t ${DOCKER_IMG_FULL_PATH}
+
+test: 
+  stage: test
+  script:
+    - |
+      docker run --rm --name discordbot-$CI_COMMIT_REF_NAME \
+        -v discordbot-commands-test:/commands \
+        -v discordbot-images-test:/images \
+        -e TOKEN=${TEST_TOKEN} \
+        -e SERVER_ID=${TEST_SERVER_ID} \
+        -e BOT_ID=${TEST_BOT_ID} \
+        -e TEST_CHANNEL=${TEST_CHANNEL} \
+        ${DOCKER_IMG_FULL_PATH} \
+        bun run test
+
+store:
+  stage: store    
+  script:
+    - echo "${CI_JOB_TOKEN}" | docker login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+    - docker push ${DOCKER_IMG_FULL_PATH}
+    - docker logout
+
+build-cleanup:
+  stage: cleanup
+  when: always
+  script:
+    - docker image rm ${DOCKER_IMG_FULL_PATH}
+
+# this is just for my server to make things easy :) 
+push-release-to-dockerio:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^release/
+  script:
+    - echo Pulling image from ${CI_REGISTRY}
+    - echo "${CI_JOB_TOKEN}" | docker login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+    - docker pull ${DOCKER_IMG_FULL_PATH}
+    - docker logout
+    - docker tag ${DOCKER_IMG_FULL_PATH} ${DOCKERHUB_USER}/${DOCKER_IMG_FULL_NAME}
+    - docker tag ${DOCKER_IMG_FULL_PATH} ${DOCKERHUB_USER}/${DOCKER_IMG_NAME}:latest
+    - echo ${DOCKERHUB_TOKEN} | docker login -u ${DOCKERHUB_USER} --password-stdin
+    - echo Pushing to dockerhub
+    - docker push ${DOCKERHUB_USER}/${DOKCER_IMG_FULL_NAME}
+    - docker push ${DOCKERHUB_USER}/${DOCKER_IMG_NAME}:latest
+    - docker logout
+
+release-cleanup:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^release/
+  when: always
+  script:
+    - docker image rm ${DOCKER_IMG_FULL_PATH}
+    - docker image rm ${DOCKERHUB_USER}/${DOKCER_IMG_FULL_NAME}
+    - docker image rm ${DOCKER_IMG_NAME} ${DOCKERHUB_USER}/${DOCKER_IMG_NAME}:latest
