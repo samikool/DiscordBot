@@ -31,7 +31,6 @@ client.on('ready', async function ()  {
     }
 });
 
-
 client.on('interactionCreate', async interaction => {
     if(interaction.isAutocomplete())
     {
