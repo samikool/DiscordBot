@@ -15,6 +15,7 @@ function init_commands(client)
 
 function load_commands(client)
 {
+    test = fs.readdirSync(`${process.env.CMD_DIR}`)
     const command_files = fs.readdirSync(process.env.CMD_DIR).filter(file => 
         file.endsWith('.js') && file != 'command_helper.js'
     );
@@ -22,14 +23,15 @@ function load_commands(client)
     for(const file of command_files) {
         add_command(file, process.env.CMD_DIR);
     }
+    
     client.commands = commands;
 }
 
 async function register_commands(client)
 {
     client.guilds.cache.forEach(async guild => {
-        info(`Registerting commands for: ${guild.name}`)
-        await rest.put(Routes.applicationGuildCommands(process.env.BOT_ID, guild.id), 
+        info(`Registering commands for: ${guild.name}`)
+        resp = await rest.put(Routes.applicationGuildCommands(process.env.BOT_ID, guild.id),
         {
             body: get_register_commands()
         });
@@ -83,7 +85,7 @@ function remove_command(cmd_name, file_name)
 function add_command(file_name)
 {
     try {
-        const path = `${process.env.CMD_DIR}${file_name}`;
+        const path = `${process.env.CMD_DIR}/${file_name}`;
         const command = require(path);
 
         if(JSON.stringify(command) == '{}') {
@@ -124,7 +126,7 @@ function add_img_command(file_name)
     const cmd_name = file_name.slice(0, -4);
     const file_string = get_img_command_file_string(cmd_name);
     info(`Attempting to add ${cmd_name} image command...`);
-    fs.writeFileSync(`${process.env.CMD_DIR}${cmd_name}.js`, file_string);
+    fs.writeFileSync(`${process.env.CMD_DIR}/${cmd_name}.js`, file_string);
     success(`Successfully added command for image: ${file_name}`);
 }
 
