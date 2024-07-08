@@ -6,3 +6,4 @@ commands
 *.sh
 nodemon.json
 scripts/
+.http
