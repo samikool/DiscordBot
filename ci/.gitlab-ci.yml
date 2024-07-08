@@ -73,4 +73,4 @@ release-cleanup:
   script:
     - docker image rm ${DOCKER_IMG_FULL_PATH}
     - docker image rm ${DOCKERHUB_USER}/${DOKCER_IMG_FULL_NAME}
-    - docker image rm ${DOCKER_IMG_NAME} ${DOCKERHUB_USER}/${DOCKER_IMG_NAME}:latest
+    - docker image rm ${DOCKERHUB_USER}/${DOCKER_IMG_NAME}:latest
