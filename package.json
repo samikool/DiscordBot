@@ -1,5 +1,5 @@
 {
-  "name": "org-discordbot",
+  "name": "discordbot",
   "version": "1.0.0",
   "description": "This bot is fucking sick yo",
   "main": "discordBot.js",
@@ -18,8 +18,9 @@
     "superagent": "9.0.2"
   },
   "scripts": {
-    "start": "nodemon discordBot.js",
-    "test": "node discordBot.js test"
+    "start": "bun bot.js",
+    "dev": "bun --watch start",
+    "test": "bun bot.js test"
   },
   "repository": {
     "type": "git",
