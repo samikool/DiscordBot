@@ -1,8 +1,6 @@
-ARG build_env
-FROM discordbot-env:$build_env
+FROM oven/bun:latest
 
-#Install discordbot
-WORKDIR /app
 COPY *.js package.json .env ./
-RUN npm install
-CMD ["node", "/app/discordBot.js"]
+RUN bun install
+
+CMD bun start
