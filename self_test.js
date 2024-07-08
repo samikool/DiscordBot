@@ -1,14 +1,9 @@
 const {success, info, warning, error} = require('./printer.js');
 const {exit} = require('process');
 
-const staging_general_channel = '792798572796968963';
-const production_bot_testing_channel = '671084731235958804';
-
 async function self_test(client) {
-    let channel = process.env.ENV == 'staging' ? 
-        await client.channels.fetch(staging_general_channel) : 
-        await client.channels.fetch(production_bot_testing_channel);
-    try{
+    let channel = await client.channels.fetch(process.env.TEST_CHANNEL)
+    try {
         info("Running self-test");
         if(Object.keys(client.commands) == 0)
             throw new Error("No commands were found to test. Failing on purpose.");
