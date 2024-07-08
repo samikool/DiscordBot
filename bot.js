@@ -1,8 +1,5 @@
-//TODO: Temp import of require will fix later on clean up for 1.
-require('dotenv').config();
 const {exit} = require('process');
 const {Client} = require('discord.js');
-
 const {self_test} = require('./self_test.js');
 const {get_command_by_name, init_commands} = require('./command_manager.js');
 const {success, info, warning, error} = require('./printer.js');
